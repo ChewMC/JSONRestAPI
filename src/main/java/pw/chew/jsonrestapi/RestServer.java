@@ -126,7 +126,10 @@ public class RestServer extends Thread {
 
                     String response = PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(UUID.randomUUID()), config.getString(key + "response"));
 
-                    respondOk(printWriter, response);
+                    // Wrap the response
+                    String json = "{\"success\": true, \"response\": " + response + "}";
+
+                    respondOk(printWriter, json);
                 } else {
                     respondNotFound(printWriter);
                 }
@@ -168,7 +171,7 @@ public class RestServer extends Thread {
          * @param writer The {@link PrintWriter} to print the response to.
          */
         private void respondOk(PrintWriter writer, String response) {
-            writer.printf("HTTP/1.2 200 OK%n%n" + response);
+            writer.printf("HTTP/1.2 200 OK%n" + "Content-Type: application/json; charset=utf-8" + "%n%n" + response);
         }
     }
 }

@@ -36,3 +36,16 @@ routes:
     method: GET
     # Whether or not to use an auth key, default false for GET.
     authkey: false
+  # You can get a little bit more complicated, too.
+  # The response is wrapped in JSON, but you can add your own, too!
+  # The JSON isn't validated, so don't worry about issues there.
+  # This one gets some basic server info. Requires the "Server" eCloud expansion.
+  server/info:
+    response: |
+      {
+        "name": "%server_name%",
+        "tps": "%server_tps_1%",
+        "online": "%server_online_players%"
+      }
+    method: GET
+    authkey: false

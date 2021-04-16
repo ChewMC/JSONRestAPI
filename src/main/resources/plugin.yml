@@ -2,7 +2,18 @@ name: JSONRestAPI
 version: ${project.version}
 main: pw.chew.jsonrestapi.JSONRestAPI
 api-version: 1.16
-depend: [ placeholderapi ]
+depend: [PlaceholderAPI]
 authors: [ Chew ]
 description: A simple web server for receiving and parsing requests.
 website: https://chew.pw/mc
+
+commands:
+  jrareload:
+    description: Reloads the configuration.
+    usage: "Usage: /jrareload"
+    permission: jsonrestapi.reload
+    permission-message: Only people with permission can reload, sorry!
+
+permissions:
+  jsonrestapi.reload:
+    default: op

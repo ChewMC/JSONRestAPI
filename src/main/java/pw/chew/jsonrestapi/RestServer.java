@@ -124,7 +124,7 @@ public class RestServer extends Thread {
                         return;
                     }
 
-                    String response = PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(UUID.randomUUID()), config.getString(key + "placeholder"));
+                    String response = PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(UUID.randomUUID()), config.getString(key + "response"));
 
                     respondOk(printWriter, response);
                 } else {

@@ -31,7 +31,7 @@ routes:
   ping:
     # The placeholder to parse.
     # This runs the parse function on this string, so anything not in placeholders will render raw.
-    placeholder: Pong!
+    response: Pong!
     # The method type, described above.
     method: GET
     # Whether or not to use an auth key, default false for GET.

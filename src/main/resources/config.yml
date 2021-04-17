@@ -1,11 +1,12 @@
 ### JSONRestAPI Configuration ###
 # Thank you for downloading this plugin!
 # I hope this isn't overly complicated, but if you run into issues, feel free to request support below:
-# Discord: https://discord.gg/0kYlxgkh65QhZAjm
+# Discord: https://discord.gg/aPHUFkYPyK
 # GitHub Discussions: https://github.com/ChewMC/JSONRestAPI/discussions
+# Guilded: https://www.guilded.gg/i/mk3mJ5YE?cid=5f11b5f1-1ef6-4c76-a9a3-45237e4103b7&intent=chat
 
 # Made changes? Run /jrareload
-# Requires jsonrestapi.reload or OP.
+# Requires jsonrestapi.reload or OP/console.
 
 # The port to listen on.
 ## Some shared hosts don't handle this very well, so you may need to change this value.
@@ -28,10 +29,10 @@ debug: false
 ## You can set up specific routes below.
 ## A GET request must not be player-specific, and can for example be to query the players online.
 ## A POST request must have a "username" or "uuid" parameter specified. Auth key is enabled by default for these.
-
+## When an auth key is required, you must include a "key" parameter.
 routes:
   # The path to listen to. This must be lowercase.
-  # Slashes are accepted, for example, ping/the_server
+  # Slashes are accepted, as shown in the second example
   # Do not include an initial slash, it is implied.
   # This one is /ping, for example.
   ping:

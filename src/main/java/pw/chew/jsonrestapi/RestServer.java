@@ -139,60 +139,99 @@ public class RestServer extends Thread {
                     logger.info("Route: " + route);
                 }
 
+                // Default route.
+                // This is a special case.
+                if (route.equals("")) {
+                    // Handle GET, just in case they try to go to the URL.
+                    if (method.equals("GET")) {
+                        // Send a "I'm alive!" response
+                        respondOk(printWriter, "{\"success\": true}");
+                    } else {
+                        // Handle POST as described in the config.
+                        // They essentially pass what would be in the route
+                        // Requires "request", "key", and "username"/"uuid"
+
+                        respondOk(printWriter, buildResponse(method, route, params, printWriter,
+                            true, params.getOrDefault("request", "")));
+                    }
+                    // We're done here.
+                    return;
+                }
+
                 // Check if route exists
                 if (config.contains("routes." + route)) {
-                    // Initialize some parameters
-                    String key = "routes." + route + ".";
-                    String configMethod = config.getString(key + "method");
-                    String authkey = config.getString("authkey");
-                    boolean keyRequired = method.equals("POST");
-
-                    // Ensure the method matches the route itself
-                    if (!method.equals(configMethod)) {
-                        respondNotAllowed(printWriter);
-                        return;
-                    }
-
-                    // If auth key is specified, override keyRequired.
-                    if (config.contains(key + ".authkey")) {
-                        keyRequired = config.getBoolean(key + ".authkey");
-                    }
-
-                    // Check if a key is required, and if the key is specified
-                    if (keyRequired && !authkey.equals(params.getOrDefault("key", ""))) {
-                        respondUnauthorized(printWriter);
-                        return;
-                    }
-
-                    // Set the player, depending on the request.
-                    OfflinePlayer player;
-                    if (method.equals("POST")) {
-                        if (params.containsKey("uuid")) {
-                            player = Bukkit.getOfflinePlayer(UUID.fromString(params.get("uuid")));
-                        } else if (params.containsKey("username")) {
-                            player = Bukkit.getPlayer(params.get("username"));
-                        } else {
-                            respondBadRequest(printWriter);
-                            return;
-                        }
-                    } else {
-                        player = Bukkit.getOfflinePlayer(UUID.randomUUID());
-                    }
-
-                    // Build the response by letting PAPI parse the placeholders
-                    String response = PlaceholderAPI.setPlaceholders(player, config.getString(key + "response"));
-
-                    // Wrap the response
-                    String json = "{\"success\": true, \"response\": " + response + "}";
-
-                    // Send it off!
-                    respondOk(printWriter, json);
+                    // Build the request and send it off!
+                    respondOk(printWriter, buildResponse(method, route, params, printWriter, false, null));
                 } else {
+                    // Doesn't exist. Try again!
                     respondNotFound(printWriter);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        private boolean isUnauthorized(String key) {
+            return !key.equals(config.getString("authkey"));
+        }
+
+        private String buildResponse(String method, String route, Map<String, String> params, PrintWriter printWriter,
+                                     boolean root, String request) /* Root request-specific params */ {
+            // By default, POST requires a key.
+            boolean keyRequired = method.equals("POST");
+
+            // Don't do this stuff for the root route.
+            if (!root) {
+                // Get the config key for this route
+                String key = "routes." + route + ".";
+
+                // Ensure the method matches the route itself
+                if (!method.equals(config.getString(key + "method"))) {
+                    respondNotAllowed(printWriter);
+                    return null;
+                }
+
+                // If auth key is specified, override keyRequired.
+                if (config.contains(key + ".authkey")) {
+                    keyRequired = config.getBoolean(key + ".authkey");
+                }
+
+                // Get the request to fill in from the config.
+                request = config.getString(key + "response");
+            }
+
+            // Check if a key is required, and if the key is specified
+            if (keyRequired && isUnauthorized(params.getOrDefault("key", ""))) {
+                respondUnauthorized(printWriter);
+                return null;
+            }
+
+            // Set the player, depending on the request.
+            OfflinePlayer player;
+            if (method.equals("POST")) {
+                if (params.containsKey("uuid")) {
+                    player = Bukkit.getOfflinePlayer(UUID.fromString(params.get("uuid")));
+                } else if (params.containsKey("username")) {
+                    player = Bukkit.getPlayer(params.get("username"));
+                } else {
+                    respondBadRequest(printWriter);
+                    return null;
+                }
+            } else {
+                player = Bukkit.getOfflinePlayer(UUID.randomUUID());
+            }
+
+            // Build the response by letting PAPI parse the placeholders
+            String response = PlaceholderAPI.setPlaceholders(player, request);
+
+            // Wrap the response
+            String json = "{\"success\": true, \"response\": \"" + response + "\"}";
+
+            if (config.getBoolean("debug")) {
+                logger.info("Response is " + json);
+            }
+
+            return json;
         }
 
         /**

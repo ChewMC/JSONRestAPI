@@ -201,7 +201,10 @@ public class RestServer extends Thread {
          * @param writer The {@link PrintWriter} to print the response to.
          */
         private void respondNotAllowed(PrintWriter writer) {
-            writer.printf("HTTP/1.2 405 Not Allowed%n%n");
+            writer.print("HTTP/1.2 405 Not Allowed\n\n"
+                + "Content-Type: application/json; charset=utf-8\n"
+                + "\n"
+                + "{\"success\": false}");
         }
 
         /**
@@ -210,7 +213,10 @@ public class RestServer extends Thread {
          * @param writer The {@link PrintWriter} to print the response to.
          */
         private void respondBadRequest(PrintWriter writer) {
-            writer.printf("HTTP/1.2 400 Bad Request%n%n");
+            writer.print("HTTP/1.2 400 Bad Request\n\n"
+                + "Content-Type: application/json; charset=utf-8\n"
+                + "\n"
+                + "{\"success\": false}");
         }
 
         /**
@@ -219,7 +225,10 @@ public class RestServer extends Thread {
          * @param writer The {@link PrintWriter} to print the response to.
          */
         private void respondNotFound(PrintWriter writer) {
-            writer.printf("HTTP/1.2 404 Not Found%n%n");
+            writer.print("HTTP/1.2 404 Not Found\n\n"
+                + "Content-Type: application/json; charset=utf-8\n"
+                + "\n"
+                + "{\"success\": false}");
         }
 
         /**
@@ -228,7 +237,10 @@ public class RestServer extends Thread {
          * @param writer The {@link PrintWriter} to print the response to.
          */
         private void respondUnauthorized(PrintWriter writer) {
-            writer.printf("HTTP/1.2 401 Unauthorized%n%n");
+            writer.print("HTTP/1.2 401 Unauthorized\n"
+                + "Content-Type: application/json; charset=utf-8\n"
+                + "\n"
+                + "{\"success\": false}");
         }
 
         /**
@@ -237,7 +249,12 @@ public class RestServer extends Thread {
          * @param writer The {@link PrintWriter} to print the response to.
          */
         private void respondOk(PrintWriter writer, String response) {
-            writer.printf("HTTP/1.2 200 OK%n" + "Content-Type: application/json; charset=utf-8" + "%n%n" + response);
+            // Don't send a null response.
+            if (response == null) {
+                return;
+            }
+
+            writer.print("HTTP/1.2 200 OK\n" + "Content-Type: application/json; charset=utf-8" + "\n\n" + response);
         }
     }
 }

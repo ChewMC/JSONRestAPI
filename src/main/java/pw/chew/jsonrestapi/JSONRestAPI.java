@@ -5,14 +5,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import pw.chew.jsonrestapi.commands.ReloadCommand;
 
 public final class JSONRestAPI extends JavaPlugin {
-    // Files
-    private static FileConfiguration config;
 
     @Override
     public void onEnable() {
         // Get and save config
-        config = this.getConfig();
+        FileConfiguration config = this.getConfig();
         config.addDefault("port", 6548);
+        config.addDefault("debug", false);
         config.addDefault("authkey", "CHANGE_ME_PLEASE");
         config.options().copyDefaults(true);
         saveDefaultConfig();
@@ -22,7 +21,7 @@ public final class JSONRestAPI extends JavaPlugin {
         server.setDaemon(true);
         server.start();
 
-        this.getCommand("jrareload").setExecutor(new ReloadCommand(config, this));
+        this.getCommand("jrareload").setExecutor(new ReloadCommand(this));
 
         this.getLogger().info("Listening on port " + config.getInt("port"));
     }

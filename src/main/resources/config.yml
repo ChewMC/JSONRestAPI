@@ -17,6 +17,12 @@ port: 6548
 ## Only takes effect if authkey: true in the routes below, plus the root route.
 authkey: CHANGE_ME_PLEASE
 
+# Debug mode
+## Adds some useful debug output for developing.
+## Includes the full request string, parameters, and route itself.
+## Most of the time no one cares about this, but you might.
+debug: false
+
 # Route setup
 ## By default, the root route accept a raw POST value for any info not provided here.
 ## You can set up specific routes below.

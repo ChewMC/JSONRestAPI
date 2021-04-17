@@ -9,11 +9,9 @@ import pw.chew.jsonrestapi.JSONRestAPI;
 import pw.chew.jsonrestapi.RestServer;
 
 public class ReloadCommand implements CommandExecutor {
-    public static FileConfiguration config;
     public final JSONRestAPI plugin;
 
-    public ReloadCommand(FileConfiguration baseConfig, JSONRestAPI plugin) {
-        config = baseConfig;
+    public ReloadCommand(JSONRestAPI plugin) {
         this.plugin = plugin;
     }
 
@@ -21,9 +19,8 @@ public class ReloadCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         sender.sendMessage("Reloading the config.");
         plugin.reloadConfig();
-        config = plugin.getConfig();
         // Tell the server about the new config.
-        RestServer.updateConfig(config);
+        RestServer.updateConfig(plugin.getConfig());
         sender.sendMessage("Configuration reloaded!");
         return true;
     }

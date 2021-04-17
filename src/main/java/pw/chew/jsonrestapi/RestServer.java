@@ -2,6 +2,7 @@ package pw.chew.jsonrestapi;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.BufferedReader;
@@ -12,8 +13,10 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -103,32 +106,86 @@ public class RestServer extends Thread {
                     return;
                 }
 
+                // Debug message
+                if (config.getBoolean("debug")) {
+                    logger.info("Received request: " + request);
+                }
+
+                // Get parameters and route
                 String route = request.substring(initialSplit + 1, routeSplit);
+                Map<String, String> params = new HashMap<>();
                 int routeQuerySplit = route.indexOf('?');
                 if (routeQuerySplit != -1) {
                     route = route.substring(0, routeQuerySplit);
+                    String paramString = request.split(" ")[1].split("\\?")[1];
+                    String[] paramSplit = paramString.split("&");
+                    for (String param : paramSplit) {
+                        String key = param.split("=")[0];
+                        String value = param.split("=")[1];
+
+                        // Debug message
+                        if (config.getBoolean("debug")) {
+                            logger.info("Added parameter " + key + " with value " + value);
+                        }
+                        params.put(key, value);
+                    }
                 }
 
                 // Remove initial slash
                 route = route.replaceFirst("/", "");
 
-                logger.info("Received request with route: " + route);
+                // Debug message
+                if (config.getBoolean("debug")) {
+                    logger.info("Route: " + route);
+                }
 
                 // Check if route exists
                 if (config.contains("routes." + route)) {
+                    // Initialize some parameters
                     String key = "routes." + route + ".";
                     String configMethod = config.getString(key + "method");
+                    String authkey = config.getString("authkey");
+                    boolean keyRequired = method.equals("POST");
 
+                    // Ensure the method matches the route itself
                     if (!method.equals(configMethod)) {
                         respondNotAllowed(printWriter);
                         return;
                     }
 
-                    String response = PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(UUID.randomUUID()), config.getString(key + "response"));
+                    // If auth key is specified, override keyRequired.
+                    if (config.contains(key + ".authkey")) {
+                        keyRequired = config.getBoolean(key + ".authkey");
+                    }
+
+                    // Check if a key is required, and if the key is specified
+                    if (keyRequired && !authkey.equals(params.getOrDefault("key", ""))) {
+                        respondUnauthorized(printWriter);
+                        return;
+                    }
+
+                    // Set the player, depending on the request.
+                    OfflinePlayer player;
+                    if (method.equals("POST")) {
+                        if (params.containsKey("uuid")) {
+                            player = Bukkit.getOfflinePlayer(UUID.fromString(params.get("uuid")));
+                        } else if (params.containsKey("username")) {
+                            player = Bukkit.getPlayer(params.get("username"));
+                        } else {
+                            respondBadRequest(printWriter);
+                            return;
+                        }
+                    } else {
+                        player = Bukkit.getOfflinePlayer(UUID.randomUUID());
+                    }
+
+                    // Build the response by letting PAPI parse the placeholders
+                    String response = PlaceholderAPI.setPlaceholders(player, config.getString(key + "response"));
 
                     // Wrap the response
                     String json = "{\"success\": true, \"response\": " + response + "}";
 
+                    // Send it off!
                     respondOk(printWriter, json);
                 } else {
                     respondNotFound(printWriter);
@@ -163,6 +220,15 @@ public class RestServer extends Thread {
          */
         private void respondNotFound(PrintWriter writer) {
             writer.printf("HTTP/1.2 404 Not Found%n%n");
+        }
+
+        /**
+         * Responds to the HTTP request with a not found header.
+         *
+         * @param writer The {@link PrintWriter} to print the response to.
+         */
+        private void respondUnauthorized(PrintWriter writer) {
+            writer.printf("HTTP/1.2 401 Unauthorized%n%n");
         }
 
         /**

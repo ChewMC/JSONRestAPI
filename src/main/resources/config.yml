@@ -19,27 +19,27 @@ port: 6548
 authkey: CHANGE_ME_PLEASE
 
 # Debug mode
-## Adds some useful debug output for developing.
+## Adds some useful debug output for development.
 ## Includes the full request string, parameters, and route itself.
-## Most of the time no one cares about this, but you might.
+## Most of the time, no one cares about this, but you might.
 debug: false
 
 # Route setup
-## By default, the root route accept a raw POST value for any info not provided here.
+## By default, the root route accepts a raw POST value for any info not provided here.
 ## You can set up specific routes below.
-## A GET request must not be player-specific, and can for example be to query the players online.
+## A GET request must not be player-specific, and can, for example, be to query the players online.
 ## A POST request must have a "username" or "uuid" parameter specified. Auth key is enabled by default for these.
 ## When an auth key is required, you must include a "key" parameter.
 routes:
   # The path to listen to. This must be lowercase.
   # Slashes are accepted, as shown in the second example
-  # Do not include an initial slash, it is implied.
+  # Do not include an initial slash; it is implied.
   # This one is /ping, for example.
   ping:
     # The placeholder to parse.
     # This runs the parse function on this string, so anything not in placeholders will render raw.
     response: Pong!
-    # The method type, described above.
+    # The method type described above.
     method: GET
     # Whether or not to use an auth key, default false for GET.
     authkey: false

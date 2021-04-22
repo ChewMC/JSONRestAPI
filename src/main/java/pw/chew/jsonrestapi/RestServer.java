@@ -224,8 +224,13 @@ public class RestServer extends Thread {
             // Build the response by letting PAPI parse the placeholders
             String response = PlaceholderAPI.setPlaceholders(player, request);
 
+            // If response is empty, set it to an empty string.
+            if (response.isEmpty()) {
+                response = "\"\""; // Will save as ""
+            }
+
             // Wrap the response
-            String json = "{\"success\": true, \"response\": \"" + response + "\"}";
+            String json = "{\"success\": true, \"response\": " + response + "}";
 
             if (config.getBoolean("debug")) {
                 logger.info("Response is " + json);

@@ -1,7 +1,7 @@
 name: JSONRestAPI
 version: ${project.version}
 main: pw.chew.jsonrestapi.JSONRestAPI
-api-version: 1.16
+api-version: 1.13
 depend: [PlaceholderAPI]
 authors: [ Chew ]
 description: A simple web server for receiving and parsing requests.

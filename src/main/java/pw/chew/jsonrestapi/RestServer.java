@@ -1,5 +1,7 @@
 package pw.chew.jsonrestapi;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -224,9 +226,17 @@ public class RestServer extends Thread {
             // Build the response by letting PAPI parse the placeholders
             String response = PlaceholderAPI.setPlaceholders(player, request);
 
-            // If response is empty, set it to an empty string.
-            if (response.isEmpty()) {
-                response = "\"\""; // Will save as ""
+            // Simple check to see if response is valid JSON. If not, just wrap it.
+            Gson gson = new Gson();
+            try {
+                // Check if string starts with what we will assume to be an object or array
+                if (response.startsWith("[") || response.startsWith("{")) {
+                    gson.fromJson(response, Object.class);
+                } else {
+                    response = "\"" + response + "\"";
+                }
+            } catch (JsonSyntaxException ex) {
+                response = "\"" + response + "\"";
             }
 
             // Wrap the response
